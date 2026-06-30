@@ -3,149 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مستشار المصاريف الذكي</title>
+    <title>مستشار المصاريف العصري</title>
     <style>
         :root {
-            --primary: #4f46e5;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
             --success: #10b981;
             --danger: #ef4444;
-            --background: #f3f4f6;
+            --danger-hover: #dc2626;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background);
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px;
-        }
-        h2 { text-align: center; color: #333; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            align-items: center;
             box-sizing: border-box;
         }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 550px;
+            transition: all 0.3s ease;
+        }
+
+        h2, h3 {
+            text-align: center;
+            margin-top: 0;
+            letter-spacing: -0.5px;
+        }
+
+        h2 { color: #fff; margin-bottom: 25px; }
+        h3 { color: var(--text-muted); font-size: 1.1rem; text-align: right; margin-top: 20px;}
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+
         button {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.2s ease;
         }
-        button:hover { opacity: 0.9; }
-        .hidden { display: none; }
-        .dashboard { margin-top: 20px; }
-        .stats {
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .hidden { display: none !important; }
+
+        .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin: 25px 0;
         }
-        .stat-box {
-            padding: 15px;
-            border-radius: 8px;
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 16px;
             text-align: center;
-            color: white;
         }
-        .bg-success { background-color: var(--success); }
-        .bg-danger { background-color: var(--danger); }
-        .item-list {
+
+        .stat-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+
+        .expense-list {
             list-style: none;
             padding: 0;
+            margin: 15px 0 0 0;
+            max-height: 250px;
+            overflow-y: auto;
         }
-        .item-list li {
-            background: #f9fafb;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 6px;
+
+        .expense-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
-            border-right: 4px solid var(--primary);
+            align-items: center;
+            animation: fadeIn 0.3s ease;
         }
-        .logout-btn { background: #6b7280; margin-top: 20px; }
+
+        .expense-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .expense-name { font-weight: 500; }
+        .expense-cost { color: var(--text-muted); font-size: 0.9rem; }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--text-muted);
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            margin-top: 25px;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        hr { border: 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 25px 0; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="auth-screen">
-        <h2 id="auth-title">تسجيل حساب جديد</h2>
+        <h2>بوابة الدخول الذكية</h2>
         <div class="form-group">
-            <label>اسم المستخدم:</label>
+            <label>اسم المستخدم</label>
             <input type="text" id="username" placeholder="أدخل اسمك">
         </div>
         <div class="form-group">
-            <label>كلمة المرور:</label>
-            <input type="password" id="password" placeholder="أدخل كلمة المرور">
+            <label>كلمة المرور</label>
+            <input type="password" id="password" placeholder="••••••••">
         </div>
-        <button id="auth-btn" onclick="handleAuth()">تأكيد الحساب والدخول</button>
+        <button onclick="handleAuth()">تسجيل الدخول / إنشاء حساب</button>
     </div>
 
     <div id="main-screen" class="hidden">
-        <h2>أهلاً بك، <span id="user-display"></span> 👋</h2>
+        <h2>أهلاً بك، <span id="user-display" style="color: var(--primary);"></span> ✨</h2>
         
         <div class="form-group">
-            <label>إجمالي الدخل الحالي:</label>
-            <input type="number" id="income-input" placeholder="مثال: 5000" onchange="updateBudget()">
+            <label>إجمالي الدخل المتاح ({ الدخل })</label>
+            <input type="number" id="income-input" placeholder="مثال: 5000" oninput="updateBudget()">
         </div>
 
         <hr>
 
         <h3>إضافة مصروف جديد</h3>
-        <div class="form-group">
-            <label>اسم الشيء (الصنف):</label>
-            <input type="text" id="item-name" placeholder="مثال: تفاح، إنترنت، ملابس">
+        <div class="form-group" style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+            <input type="text" id="item-name" placeholder="الصنف (تفاح، كهرباء...)">
+            <input type="number" id="item-cost" placeholder="المبلغ">
         </div>
-        <div class="form-group">
-            <label>المبلغ:</label>
-            <input type="number" id="item-cost" placeholder="مثال: 50">
-        </div>
-        <button onclick="addExpense()">إضافة المصروف</button>
+        <button onclick="addExpense()">إضافة إلى القائمة</button>
 
-        <div class="dashboard">
-            <div class="stats">
-                <div class="stat-box bg-danger">
-                    <div>مجموع المصاريف</div>
-                    <div id="total-expenses">0</div>
-                </div>
-                <div class="stat-box bg-success">
-                    <div>المتبقي من الدخل</div>
-                    <div id="remaining-budget">0</div>
-                </div>
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-title">إجمالي المصاريف</div>
+                <div id="total-expenses" class="stat-value text-danger">0</div>
             </div>
-
-            <h3>قائمة المصاريف المفصلة:</h3>
-            <ul id="expenses-container" class="item-list"></ul>
+            <div class="stat-card">
+                <div class="stat-title">المتبقي من الدخل</div>
+                <div id="remaining-budget" class="stat-value text-success">0</div>
+            </div>
         </div>
 
-        <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+        <h3>المشتريات الحالية</h3>
+        <ul id="expenses-container" class="expense-list"></ul>
+
+        <button class="logout-btn" onclick="logout()">خروج آمن</button>
     </div>
 </div>
 
 <script>
-    // متغيرات النظام
     let currentUser = null;
     let userData = { income: 0, expenses: [] };
 
-    // التحقق عند تحميل الصفحة إذا كان هناك مستخدم مسجل مسبقاً
     window.onload = function() {
-        const savedUser = localStorage.getItem('currentUser');
+        const savedUser = localStorage.getItem('modern_curr_user');
         if (savedUser) {
             currentUser = savedUser;
             loadUserData();
@@ -153,42 +258,37 @@
         }
     };
 
-    // إدارة نظام الحسابات (حفظ وتأكيد الدخول)
     function handleAuth() {
         const user = document.getElementById('username').value.trim();
         const pass = document.getElementById('password').value.trim();
 
         if (!user || !pass) {
-            alert('رجاءً املأ الفراغات بالاسم والباسوورد');
+            alert('الرجاء إدخال الاسم وكلمة المرور');
             return;
         }
 
-        // جلب الحساب المسمّى بهذا الاسم إن وجد في قاعدة البيانات المحلية
-        const existingAccount = localStorage.getItem(`account_${user}`);
+        const existingAccount = localStorage.getItem(`user_${user}`);
 
         if (existingAccount) {
-            const accDetails = JSON.parse(existingAccount);
-            if (accDetails.password === pass) {
-                // كلمة المرور صحيحة -> تسجيل دخول
+            const acc = JSON.parse(existingAccount);
+            if (acc.password === pass) {
                 currentUser = user;
             } else {
-                alert('كلمة المرور خاطئة لهذا المستخدم!');
+                alert('كلمة المرور غير صحيحة!');
                 return;
             }
         } else {
-            // الحساب غير موجود -> إنشاء حساب جديد تلقائياً وحفظه
-            const newAccount = { password: pass, income: 0, expenses: [] };
-            localStorage.setItem(`account_${user}`, JSON.stringify(newAccount));
+            // إنشاء حساب جديد فارغ إذا لم يكن موجوداً مسبقاً
+            const newAcc = { password: pass, income: 0, expenses: [] };
+            localStorage.setItem(`user_${user}`, JSON.stringify(newAcc));
             currentUser = user;
-            alert('تم إنشاء حسابك وحفظه بنجاح!');
         }
 
-        localStorage.setItem('currentUser', currentUser);
+        localStorage.setItem('modern_curr_user', currentUser);
         loadUserData();
         showMainScreen();
     }
 
-    // شاشات العرض
     function showMainScreen() {
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-screen').classList.remove('hidden');
@@ -196,29 +296,25 @@
         renderData();
     }
 
-    // جلب بيانات المستخدم الحالي
     function loadUserData() {
-        const data = localStorage.getItem(`account_${currentUser}`);
+        const data = localStorage.getItem(`user_${currentUser}`);
         if (data) {
             userData = JSON.parse(data);
             document.getElementById('income-input').value = userData.income || '';
         }
     }
 
-    // حفظ البيانات الحالية في المتصفح
     function saveUserData() {
-        localStorage.setItem(`account_${currentUser}`, JSON.stringify(userData));
+        localStorage.setItem(`user_${currentUser}`, JSON.stringify(userData));
     }
 
-    // تحديث قيمة الدخل المالي
     function updateBudget() {
-        const incomeValue = parseFloat(document.getElementById('income-input').value) || 0;
-        userData.income = incomeValue;
+        const val = parseFloat(document.getElementById('income-input').value) || 0;
+        userData.income = val;
         saveUserData();
         renderData();
     }
 
-    // إضافة مصروف جديد للصنف المحدد
     function addExpense() {
         const nameInput = document.getElementById('item-name');
         const costInput = document.getElementById('item-cost');
@@ -227,47 +323,52 @@
         const cost = parseFloat(costInput.value) || 0;
 
         if (!name || cost <= 0) {
-            alert('الرجاء إدخال اسم شيء صحيح ومبلغ أكبر من الصفر');
+            alert('يرجى إدخال اسم صنف ومبلغ صحيح');
             return;
         }
 
-        // إضافة المصروف مفرداً لحسابه
-        userData.expenses.push({ name: name, cost: cost });
+        // إدراج عنصر فريد مع معرف زمني لتسهيل الحذف الفردي
+        userData.expenses.push({ id: Date.now(), name: name, cost: cost });
         saveUserData();
         renderData();
 
-        // تصفير الخانات للإدخال القادم
         nameInput.value = '';
         costInput.value = '';
     }
 
-    // حساب وعرض العمليات الحسابية والقائمة
+    // خاصية الحذف الجديدة
+    function deleteExpense(id) {
+        userData.expenses = userData.expenses.filter(item => item.id !== id);
+        saveUserData();
+        renderData();
+    }
+
     function renderData() {
-        const listContainer = document.getElementById('expenses-container');
-        listContainer.innerHTML = '';
+        const container = document.getElementById('expenses-container');
+        container.innerHTML = '';
+        let total = 0;
 
-        let totalExpenses = 0;
-
-        // بناء القائمة وحساب المجموع
         userData.expenses.forEach(item => {
-            totalExpenses += item.cost;
-            
+            total += item.cost;
             const li = document.createElement('li');
-            li.innerHTML = `<span>${item.name}</span> <b>${item.cost}</b>`;
-            listContainer.appendChild(li);
+            li.className = 'expense-item';
+            li.innerHTML = `
+                <div class="expense-info">
+                    <span class="expense-name">${item.name}</span>
+                    <span class="expense-cost">(${item.cost})</span>
+                </div>
+                <button class="delete-btn" onclick="deleteExpense(${item.id})">حذف</button>
+            `;
+            container.appendChild(li);
         });
 
-        // الحسابات الرياضية
-        const remaining = userData.income - totalExpenses;
-
-        // عرض النتائج على الشاشة
-        document.getElementById('total-expenses').innerText = totalExpenses;
+        const remaining = userData.income - total;
+        document.getElementById('total-expenses').innerText = total;
         document.getElementById('remaining-budget').innerText = remaining;
     }
 
-    // تسجيل الخروج
     function logout() {
-        localStorage.removeItem('currentUser');
+        localStorage.removeItem('modern_curr_user');
         currentUser = null;
         document.getElementById('auth-screen').classList.remove('hidden');
         document.getElementById('main-screen').classList.add('hidden');
