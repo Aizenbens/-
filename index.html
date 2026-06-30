@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مستشار المصاريف الذكي</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --background: #f3f4f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { opacity: 0.9; }
+        .hidden { display: none; }
+        .dashboard { margin-top: 20px; }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+        }
+        .bg-success { background-color: var(--success); }
+        .bg-danger { background-color: var(--danger); }
+        .item-list {
+            list-style: none;
+            padding: 0;
+        }
+        .item-list li {
+            background: #f9fafb;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            border-right: 4px solid var(--primary);
+        }
+        .logout-btn { background: #6b7280; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="auth-screen">
+        <h2 id="auth-title">تسجيل حساب جديد</h2>
+        <div class="form-group">
+            <label>اسم المستخدم:</label>
+            <input type="text" id="username" placeholder="أدخل اسمك">
+        </div>
+        <div class="form-group">
+            <label>كلمة المرور:</label>
+            <input type="password" id="password" placeholder="أدخل كلمة المرور">
+        </div>
+        <button id="auth-btn" onclick="handleAuth()">تأكيد الحساب والدخول</button>
+    </div>
+
+    <div id="main-screen" class="hidden">
+        <h2>أهلاً بك، <span id="user-display"></span> 👋</h2>
+        
+        <div class="form-group">
+            <label>إجمالي الدخل الحالي:</label>
+            <input type="number" id="income-input" placeholder="مثال: 5000" onchange="updateBudget()">
+        </div>
+
+        <hr>
+
+        <h3>إضافة مصروف جديد</h3>
+        <div class="form-group">
+            <label>اسم الشيء (الصنف):</label>
+            <input type="text" id="item-name" placeholder="مثال: تفاح، إنترنت، ملابس">
+        </div>
+        <div class="form-group">
+            <label>المبلغ:</label>
+            <input type="number" id="item-cost" placeholder="مثال: 50">
+        </div>
+        <button onclick="addExpense()">إضافة المصروف</button>
+
+        <div class="dashboard">
+            <div class="stats">
+                <div class="stat-box bg-danger">
+                    <div>مجموع المصاريف</div>
+                    <div id="total-expenses">0</div>
+                </div>
+                <div class="stat-box bg-success">
+                    <div>المتبقي من الدخل</div>
+                    <div id="remaining-budget">0</div>
+                </div>
+            </div>
+
+            <h3>قائمة المصاريف المفصلة:</h3>
+            <ul id="expenses-container" class="item-list"></ul>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+    </div>
+</div>
+
+<script>
+    // متغيرات النظام
+    let currentUser = null;
+    let userData = { income: 0, expenses: [] };
+
+    // التحقق عند تحميل الصفحة إذا كان هناك مستخدم مسجل مسبقاً
+    window.onload = function() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            currentUser = savedUser;
+            loadUserData();
+            showMainScreen();
+        }
+    };
+
+    // إدارة نظام الحسابات (حفظ وتأكيد الدخول)
+    function handleAuth() {
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
+
+        if (!user || !pass) {
+            alert('رجاءً املأ الفراغات بالاسم والباسوورد');
+            return;
+        }
+
+        // جلب الحساب المسمّى بهذا الاسم إن وجد في قاعدة البيانات المحلية
+        const existingAccount = localStorage.getItem(`account_${user}`);
+
+        if (existingAccount) {
+            const accDetails = JSON.parse(existingAccount);
+            if (accDetails.password === pass) {
+                // كلمة المرور صحيحة -> تسجيل دخول
+                currentUser = user;
+            } else {
+                alert('كلمة المرور خاطئة لهذا المستخدم!');
+                return;
+            }
+        } else {
+            // الحساب غير موجود -> إنشاء حساب جديد تلقائياً وحفظه
+            const newAccount = { password: pass, income: 0, expenses: [] };
+            localStorage.setItem(`account_${user}`, JSON.stringify(newAccount));
+            currentUser = user;
+            alert('تم إنشاء حسابك وحفظه بنجاح!');
+        }
+
+        localStorage.setItem('currentUser', currentUser);
+        loadUserData();
+        showMainScreen();
+    }
+
+    // شاشات العرض
+    function showMainScreen() {
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-screen').classList.remove('hidden');
+        document.getElementById('user-display').innerText = currentUser;
+        renderData();
+    }
+
+    // جلب بيانات المستخدم الحالي
+    function loadUserData() {
+        const data = localStorage.getItem(`account_${currentUser}`);
+        if (data) {
+            userData = JSON.parse(data);
+            document.getElementById('income-input').value = userData.income || '';
+        }
+    }
+
+    // حفظ البيانات الحالية في المتصفح
+    function saveUserData() {
+        localStorage.setItem(`account_${currentUser}`, JSON.stringify(userData));
+    }
+
+    // تحديث قيمة الدخل المالي
+    function updateBudget() {
+        const incomeValue = parseFloat(document.getElementById('income-input').value) || 0;
+        userData.income = incomeValue;
+        saveUserData();
+        renderData();
+    }
+
+    // إضافة مصروف جديد للصنف المحدد
+    function addExpense() {
+        const nameInput = document.getElementById('item-name');
+        const costInput = document.getElementById('item-cost');
+        
+        const name = nameInput.value.trim();
+        const cost = parseFloat(costInput.value) || 0;
+
+        if (!name || cost <= 0) {
+            alert('الرجاء إدخال اسم شيء صحيح ومبلغ أكبر من الصفر');
+            return;
+        }
+
+        // إضافة المصروف مفرداً لحسابه
+        userData.expenses.push({ name: name, cost: cost });
+        saveUserData();
+        renderData();
+
+        // تصفير الخانات للإدخال القادم
+        nameInput.value = '';
+        costInput.value = '';
+    }
+
+    // حساب وعرض العمليات الحسابية والقائمة
+    function renderData() {
+        const listContainer = document.getElementById('expenses-container');
+        listContainer.innerHTML = '';
+
+        let totalExpenses = 0;
+
+        // بناء القائمة وحساب المجموع
+        userData.expenses.forEach(item => {
+            totalExpenses += item.cost;
+            
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${item.name}</span> <b>${item.cost}</b>`;
+            listContainer.appendChild(li);
+        });
+
+        // الحسابات الرياضية
+        const remaining = userData.income - totalExpenses;
+
+        // عرض النتائج على الشاشة
+        document.getElementById('total-expenses').innerText = totalExpenses;
+        document.getElementById('remaining-budget').innerText = remaining;
+    }
+
+    // تسجيل الخروج
+    function logout() {
+        localStorage.removeItem('currentUser');
+        currentUser = null;
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('main-screen').classList.add('hidden');
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+    }
+</script>
+
+</body>
+</html>
